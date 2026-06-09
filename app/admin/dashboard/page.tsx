@@ -47,6 +47,10 @@ function formatMoney(n: number) {
   return n.toLocaleString('zh-TW')
 }
 
+function formatStock(n: number): string {
+  return Number.isInteger(n) ? String(n) : n.toFixed(2)
+}
+
 export default function DashboardPage() {
   const [daily, setDaily] = useState<DailyReport | null>(null)
   const [monthly, setMonthly] = useState<MonthlyReport | null>(null)
@@ -187,7 +191,7 @@ export default function DashboardPage() {
                             <span className={`w-2 h-2 rounded-full shrink-0 ${isCritical ? 'bg-red-500' : 'bg-yellow-400'}`} />
                             <span className="flex-1 text-sm text-ink">{item.name}</span>
                             <span className="text-xs text-ink/50 font-mono">
-                              {item.stock_qty} / {item.safety_stock} {item.stock_unit}
+                              {formatStock(item.stock_qty)} / {formatStock(item.safety_stock)} {item.stock_unit}
                             </span>
                           </div>
                         )

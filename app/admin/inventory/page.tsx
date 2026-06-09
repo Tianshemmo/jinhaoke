@@ -37,6 +37,10 @@ function guessCategory(name: string): string {
   return '耗材'
 }
 
+function formatStock(n: number): string {
+  return Number.isInteger(n) ? String(n) : n.toFixed(2)
+}
+
 function effectiveBlockThreshold(item: InventoryItem): number {
   if (item.order_block_threshold !== null && item.order_block_threshold !== undefined) {
     return item.order_block_threshold
@@ -258,10 +262,10 @@ function InventoryTab() {
                 >
                   <td className="px-4 py-3 font-medium text-ink">{item.name}</td>
                   <td className="px-4 py-3 text-right font-mono text-ink">
-                    {item.stock_qty} <span className="text-ink/40 text-xs">{item.stock_unit}</span>
+                    {formatStock(item.stock_qty)} <span className="text-ink/40 text-xs">{item.stock_unit}</span>
                   </td>
                   <td className="px-4 py-3 text-right text-ink/40 font-mono">
-                    {item.safety_stock} <span className="text-ink/30 text-xs">{item.stock_unit}</span>
+                    {formatStock(item.safety_stock)} <span className="text-ink/30 text-xs">{item.stock_unit}</span>
                   </td>
                   <td className="px-4 py-3 text-right font-mono">
                     <span className={isOverride ? 'text-clay' : 'text-ink/40'}>

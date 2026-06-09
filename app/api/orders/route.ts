@@ -136,12 +136,28 @@ export async function POST(request: Request) {
 
     const db = getDb()
 
-    // 產生訂單編號：A202606030001
-    // 日期格式修正：使用 YYYY-MM-DD 以不與報表查詢不一致
-    const todayFormatted = new Date().toISOString().slice(0, 10)  // YYYY-MM-DD
+    // 修正：使用本地時區日期格式 YYYY-MM-DD，避免 ISOString 的 UTC 誤差
+    const now = new Date()
+    const todayFormatted = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
     const todayCompact = todayFormatted.replace(/-/g, '')  // YYYYMMDD
-    const randomDigits = String(Math.floor(Math.random() * 10000)).padStart(4, '0')
-    const orderId = `A${todayCompact}${randomDigits}`
+
+    // 產生當日流水號：從 0001 開始，抓取當天最大序號遞增
+    const lastOrderRow = db.prepare(`
+      SELECT order_id FROM "order" 
+      WHERE order_date = ? 
+      AND order_id LIKE ?
+      ORDER BY order_id DESC LIMIT 1
+    `).get(todayFormatted, `${todayCompact}%`) as { order_id: string } | undefined
+
+    let sequence = '0001'
+    if (lastOrderRow) {
+      const lastId = lastOrderRow.order_id
+      const lastSeq = parseInt(lastId.slice(8), 10)
+      if (!isNaN(lastSeq)) {
+        sequence = String(lastSeq + 1).padStart(4, '0')
+      }
+    }
+    const orderId = `${todayCompact}${sequence}`
 
     // 電話處理：內用沒電話 → 產暫時電話
     const phone = customer_phone?.trim() || `09${orderId.slice(-8)}`
