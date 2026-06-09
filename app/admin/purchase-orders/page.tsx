@@ -14,6 +14,16 @@ interface Supplier {
   name: string
 }
 
+interface Ingredient {
+  name: string
+  stock_qty: number
+  safety_stock: number
+  stock_unit: string
+  order_unit: string
+  qty_per_order_unit: number
+  supplier_name: string | null
+}
+
 const STATUS_COLORS: Record<string, string> = {
   '已訂購':  'bg-blue-100 text-blue-700',
   '已驗貨':  'bg-green-100 text-green-700',
@@ -27,6 +37,7 @@ function formatMoney(n: number) {
 export default function PurchaseOrdersPage() {
   const [orders, setOrders] = useState<PurchaseOrder[]>([])
   const [suppliers, setSuppliers] = useState<Supplier[]>([])
+  const [ingredients, setIngredients] = useState<Ingredient[]>([])
   const [loading, setLoading] = useState(true)
   const [tab, setTab] = useState<'list' | 'create'>('list')
   const [selectedPo, setSelectedPo] = useState<PurchaseOrder | null>(null)
@@ -56,10 +67,19 @@ export default function PurchaseOrdersPage() {
     } catch { /* ignore */ }
   }, [])
 
+  const fetchIngredients = useCallback(async () => {
+    try {
+      const res = await fetch('/api/ingredients')
+      const data = await res.json()
+      if (data.success) setIngredients(data.data)
+    } catch { /* ignore */ }
+  }, [])
+
   useEffect(() => {
     fetchOrders()
     fetchSuppliers()
-  }, [fetchOrders, fetchSuppliers])
+    fetchIngredients()
+  }, [fetchOrders, fetchSuppliers, fetchIngredients])
 
   const addItemRow = () => {
     setNewItems(prev => [...prev, { ingredient_name: '', order_qty: '', total_cost: '' }])
@@ -265,13 +285,18 @@ export default function PurchaseOrdersPage() {
                   <div className="space-y-2">
                     {newItems.map((item, idx) => (
                       <div key={idx} className="flex gap-2 items-center">
-                        <input
-                          type="text"
-                          placeholder="食材名稱"
+                        <select
                           value={item.ingredient_name}
                           onChange={e => updateItem(idx, 'ingredient_name', e.target.value)}
-                          className="flex-1 px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-clay"
-                        />
+                          className="flex-1 px-3 py-2 border border-border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-clay bg-white"
+                        >
+                          <option value="">請選擇食材</option>
+                          {ingredients.map(ing => (
+                            <option key={ing.name} value={ing.name}>
+                              {ing.name} ({ing.stock_unit})
+                            </option>
+                          ))}
+                        </select>
                         <input
                           type="number"
                           placeholder="數量"

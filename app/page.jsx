@@ -84,6 +84,11 @@ export default function CustomerOrderPage() {
     ? menu
     : menu.filter(item => item.tag === activeTag)
 
+  // 動態取得所有分類（不硬編碼）
+  const allCategories = ['手作便當', '燴飯', '單點']
+  const dynamicCategories = Array.from(new Set(menu.map(item => item.category)))
+  const categoriesToShow = dynamicCategories.length > 0 ? dynamicCategories.sort() : allCategories
+
   // ---- 函式 ----
   const addToCart = (item) => {
     if (isBlocked(item.item_id)) return
@@ -225,7 +230,7 @@ export default function CustomerOrderPage() {
           )}
 
           {/* 類別區塊 */}
-          {!menuLoading && ['手作便當', '燴飯', '單點'].map(cat => {
+          {!menuLoading && categoriesToShow.map(cat => {
             const catItems = filteredMenu.filter(i => i.category === cat)
             if (catItems.length === 0) return null
 

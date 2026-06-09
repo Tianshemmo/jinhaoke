@@ -137,9 +137,11 @@ export async function POST(request: Request) {
     const db = getDb()
 
     // 產生訂單編號：A202606030001
-    const today = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+    // 日期格式修正：使用 YYYY-MM-DD 以不與報表查詢不一致
+    const todayFormatted = new Date().toISOString().slice(0, 10)  // YYYY-MM-DD
+    const todayCompact = todayFormatted.replace(/-/g, '')  // YYYYMMDD
     const randomDigits = String(Math.floor(Math.random() * 10000)).padStart(4, '0')
-    const orderId = `A${today}${randomDigits}`
+    const orderId = `A${todayCompact}${randomDigits}`
 
     // 電話處理：內用沒電話 → 產暫時電話
     const phone = customer_phone?.trim() || `09${orderId.slice(-8)}`
@@ -155,10 +157,11 @@ export async function POST(request: Request) {
       `).run(phone, customer_name.trim())
 
       // 2. 寫入訂單主表（order 表沒有 note 欄，所以略過）
+      // 日期存儲使用 YYYY-MM-DD 格式，以不與報表查詢不一致
       db.prepare(`
         INSERT INTO "order" (order_id, order_date, status, customer_phone)
         VALUES (?, ?, '待製作', ?)
-      `).run(orderId, today, phone)
+      `).run(orderId, todayFormatted, phone)
 
       // 3. 寫入訂單明細（用下單時的單價快照）
       //    - 防呆：item_id 缺漏 / 查不到 menu_item → throw，整個 transaction rollback

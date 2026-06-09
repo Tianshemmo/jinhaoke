@@ -27,7 +27,8 @@ type FormData = {
   image_url: string
 }
 
-const CATEGORIES = ['全部', '便當', '單點', '飲料']
+// 後台菜單管理的分類篩選 - 後續動態產生
+const INITIAL_CATEGORIES = ['全部', '便當', '單點', '飲料']
 const MENU_CATEGORIES = ['便當', '單點', '飲料']
 
 const EMPTY_FORM: FormData = {
@@ -49,6 +50,7 @@ export default function MenuPage() {
   const [activeCategory, setActiveCategory] = useState('全部')
   const [search, setSearch] = useState('')
   const [showInactive, setShowInactive] = useState(false)
+  const [categories, setCategories] = useState(INITIAL_CATEGORIES)
 
   const [modalOpen, setModalOpen] = useState(false)
   const [editTarget, setEditTarget] = useState<MenuItem | null>(null)
@@ -75,6 +77,22 @@ export default function MenuPage() {
   }, [showInactive])
 
   useEffect(() => { fetchMenu() }, [fetchMenu])
+
+  // 當 items 變化時，動態更新分類清單
+  useEffect(() => {
+    if (items.length > 0) {
+      const uniqueCategories = Array.from(new Set(items.map(i => i.category)))
+      const newCategories = ['全部', ...uniqueCategories.sort()]
+      setCategories(newCategories)
+    }
+  }, [items])
+
+  // 確保 activeCategory 存在於 categories 中，否則重設為「全部」
+  useEffect(() => {
+    if (!categories.includes(activeCategory)) {
+      setActiveCategory('全部')
+    }
+  }, [categories, activeCategory])
 
   const filtered = items.filter(item => {
     const matchActive = showInactive || item.is_active === 1
@@ -285,7 +303,7 @@ export default function MenuPage() {
                 顯示已下架
               </label>
               <div className="flex gap-2">
-                {CATEGORIES.map(cat => (
+                {categories.map(cat => (
                   <button
                     key={cat}
                     onClick={() => setActiveCategory(cat)}

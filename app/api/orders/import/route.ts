@@ -123,7 +123,7 @@ export async function POST(request: Request) {
         errors.push({ row: rowNum, reason: `找不到餐點：${item_name}` })
         continue
       }
-      if (phone && !/^\d{8,15}$/.test(phone)) {
+      if (phone && !/^\d{3,15}$/.test(phone)) {
         errors.push({ row: rowNum, reason: `電話格式錯誤：${phone}` })
         continue
       }
