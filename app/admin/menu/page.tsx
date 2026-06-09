@@ -28,12 +28,12 @@ type FormData = {
 }
 
 // 後台菜單管理的分類篩選 - 後續動態產生
-const INITIAL_CATEGORIES = ['全部', '便當', '單點', '飲料']
-const MENU_CATEGORIES = ['便當', '單點', '飲料']
+const INITIAL_CATEGORIES = ['全部', '手作便當', '單點', '飲料']
+const MENU_CATEGORIES = ['手作便當', '單點', '飲料']
 
 const EMPTY_FORM: FormData = {
   name: '',
-  category: '便當',
+  category: '手作便當',
   price: 0,
   emoji: '',
   tag: '',
