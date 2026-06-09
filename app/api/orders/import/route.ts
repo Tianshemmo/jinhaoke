@@ -182,7 +182,7 @@ export async function POST(request: Request) {
 
     const insertOrder = db.prepare(`
       INSERT INTO "order" (order_id, order_date, created_at, updated_at, status, customer_phone)
-      VALUES (?, ?, ?, ?, '待製作', ?)
+      VALUES (?, ?, ?, ?, '已完成', ?)
     `)
     const insertItem = db.prepare(`
       INSERT INTO order_item (order_id, item_id, quantity, unit_price)
